@@ -1,16 +1,72 @@
-﻿@page "/counter"
+﻿@page "/getmessages"
 
-<h1>Counter</h1>
+@using System.Net.Http
+@inject HttpClient Http
 
-<p>Current count: @currentCount</p>
+<pre><code>app.UseCors(policy => 
+    policy.WithOrigins("http://localhost:5000", "https://localhost:5001")
+    .AllowAnyMethod()
+    .WithHeaders(HeaderNames.ContentType));</code></pre>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<h1>Messages</h1>
 
-@code {
-    private int currentCount = 0;
+<p>All system messages:</p>
 
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
+
+@if (messages == null)
+{
+    <p><em>Loading...</em></p>
 }
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Treść</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var message in messages)
+            {
+                <tr>
+                    <td>@message.ID</td>
+                    <td>@message.Date</td>
+                    <td>@message.Tresc</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+    @code {
+        private Message[] messages;
+
+        //private async Task GetAllMessages()
+        //{
+        //    messages = await Http.GetFromJsonAsync<Message[]>("https://localhost:5001/api/Messages");
+        //}
+
+
+        protected override async Task OnInitializedAsync() => await GetAllMessages();
+
+        private async Task GetAllMessages() => messages = await Http.GetFromJsonAsync<Message[]>("https://localhost:5001/api/Messages");
+
+
+        //List<Message> Messages = new List<Message>();
+
+        //private async Task GetAllMessages()
+        //{
+        //    Messages = await Http.GetFromJsonAsync<List<Message>>("https://localhost:5001/api/Messages");
+        //}
+
+        public class Message
+        {
+            public string ID { get; set; }
+            public DateTime Date { get; set; }
+            public string Tresc { get; set; }
+        }
+
+    }
+
+
